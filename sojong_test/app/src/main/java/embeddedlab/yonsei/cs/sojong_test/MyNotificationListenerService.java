@@ -1,9 +1,13 @@
 package embeddedlab.yonsei.cs.sojong_test;
 
 import android.app.ActivityManager;
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -22,6 +26,9 @@ public class MyNotificationListenerService extends NotificationListenerService {
 
     Handler handler;
 
+    SQLiteDatabase database;
+    MySQLiteOpenHelper sqLiteOpenHelper;
+
     @Override
     public void onCreate() {
 
@@ -32,6 +39,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
         handler = new Handler();
 
         Toast.makeText(this, "서비스 시작", Toast.LENGTH_SHORT).show();
+
 
     }
 
@@ -49,7 +57,21 @@ public class MyNotificationListenerService extends NotificationListenerService {
     public void onNotificationPosted(StatusBarNotification sbn) {
 
         Log.d(TAG, "onNotificationPosted called");
-        handler.post(new ToastRunnable("Notification Posted : " + sbn.getPackageName()));
+        //handler.post(new ToastRunnable("Notification Posted : " + sbn.getPackageName()));
+
+        TinyDB tinyDB = new TinyDB(this.getApplicationContext());
+        tinyDB.putLong(sbn.getPackageName(), tinyDB.getLong("counter", 0));
+
+        sqLiteOpenHelper = new MySQLiteOpenHelper(this, 1);
+        database = sqLiteOpenHelper.getWritableDatabase();
+
+        String[] args = {sbn.getPackageName()};
+        Cursor cursor = database.query("apprank", null, "pname = ?", args, null, null, null);
+        if(cursor.getCount()==0) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put("pname", sbn.getPackageName());
+            database.insert("apprank", null, contentValues);
+        }
 
     }
 
@@ -57,35 +79,86 @@ public class MyNotificationListenerService extends NotificationListenerService {
     public void onNotificationRemoved(StatusBarNotification sbn) {
 
 
-        String notificationPackageName = sbn.getNotification().contentIntent.getCreatorPackage();
+        Log.d(TAG, "onNotificationRemoved called : " + sbn.getPackageName());
 
-        Log.d(TAG, "onNotificationRemoved called : " + notificationPackageName);
+
+        TinyDB tinyDB = new TinyDB(this.getApplicationContext());
+
+        tinyDB.putInt("active_noti", getActiveNotifications().length);
+        Log.d(TAG, getActiveNotifications().length + "");
+        //handler.post(new ToastRunnable("Notification Number : " + getActiveNotifications().length));
+
+
+
+        Long init_counter = tinyDB.getLong(sbn.getPackageName(), 0);
+        Long counter = tinyDB.getLong("counter", 0);
+        Long count = counter - init_counter;
+
 
 
         String packageName = sbn.getPackageName();
-        try {
-            List<AndroidAppProcess> processes = ProcessManager.getRunningAppProcesses();
-            if (processes != null) {
-                for (AndroidAppProcess process : processes) {
-                    String processName = process.name;
-                    if (processName.equals(packageName)) {
-                        if (process.foreground ==true)
-                        {
-                            //user clicked on notification
-                            handler.post(new ToastRunnable("Notification Clicked : " + sbn.getPackageName()));
-                        }
-                        else
-                        {
-                            //user swipe notification
-                            handler.post(new ToastRunnable("Notification Removed : " + sbn.getPackageName()));
+
+        sqLiteOpenHelper = new MySQLiteOpenHelper(this, 1);
+        database = sqLiteOpenHelper.getWritableDatabase();
+        String[] args = {packageName};
+        Cursor cursor = database.query("apprank", null, "pname = ?", args, null, null, null);
+        if(cursor.getCount() != 0){
+            cursor.moveToFirst();
+
+            final Double rankpoint = cursor.getDouble(cursor.getColumnIndex("rankpoint"));
+            Double newRankPoint = rankpoint;
+
+            try {
+                List<AndroidAppProcess> processes = ProcessManager.getRunningAppProcesses();
+                if (processes != null) {
+                    for (AndroidAppProcess process : processes) {
+                        String processName = process.name;
+                        if (processName.equals(packageName)) {
+                            if (process.foreground == true)
+                            {
+                                //user clicked on notification
+                                //handler.post(new ToastRunnable("Notification Clicked : " + sbn.getPackageName()));
+                                if(count <= 3){
+                                    newRankPoint = (rankpoint * 9 + 3.0) / 10;
+                                } else if(count <= 5){
+                                    newRankPoint = (rankpoint * 9 + 2.0) / 10;
+                                } else if(count <= 7){
+                                    newRankPoint = (rankpoint * 9 + 1.0) / 10;
+                                } else {
+                                    newRankPoint = rankpoint;
+                                }
+
+
+
+                            }
+                            else
+                            {
+                                //user swipe notification
+                                //handler.post(new ToastRunnable("Notification Removed : " + sbn.getPackageName()));
+                                if(count <= 3){
+                                    newRankPoint = (rankpoint * 9 - 3.0) / 10;
+                                } else if(count <= 5){
+                                    newRankPoint = (rankpoint * 9 - 2.0) / 10;
+                                } else if(count <= 7){
+                                    newRankPoint = (rankpoint * 9 - 1.0) / 10;
+                                } else {
+                                    newRankPoint = rankpoint;
+                                }
+
+                            }
                         }
                     }
                 }
             }
-        }
-        catch (Exception e)
-        {
-            String error = e.toString();
+            catch (Exception e)
+            {
+                String error = e.toString();
+            }
+
+            ContentValues contentValues = new ContentValues();
+            contentValues.put("pname", sbn.getPackageName());
+            contentValues.put("rankpoint", newRankPoint);
+            database.update("apprank", contentValues, "pname = ?", args);
         }
 
     }

@@ -11,15 +11,8 @@
     android:orientation="vertical"
     tools:context="embeddedlab.yonsei.cs.sojong_test.MainActivity">
 
-    <Button
+    <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="노티 리스너 서비스 시작"
-        android:id="@+id/button_start"/>
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="노티 리스너 서비스 종료"
-        android:id="@+id/button_end"/>
+        android:id="@+id/recyclerView_rank"/>
 </LinearLayout>
