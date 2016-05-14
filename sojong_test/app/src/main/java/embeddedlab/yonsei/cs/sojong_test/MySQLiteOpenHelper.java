@@ -13,7 +13,7 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper{
 
     public MySQLiteOpenHelper(Context ctx, int version) {
         // Database이름은 실제 단말상에서 생성될 파일이름입니다. data/data/package명/databases/DATABASE_NAME식으로 저장
-        super(ctx, "rank.db", null, version);    // 제일 마지막 인자 : 버젼, 만약 버젼이 높아지면 onUpgrade를 수행한다.
+        super(ctx, "/mnt/sdcard/rank.db", null, version);    // 제일 마지막 인자 : 버젼, 만약 버젼이 높아지면 onUpgrade를 수행한다.
         context =  ctx;
     }
 
@@ -23,7 +23,7 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper{
 
         sql = "create table apprank ("
                 + "pname text primary key, "
-                + "rankpoint double default 1.5);";
+                + "rankpoint double default 2.0);";
         db.execSQL(sql);
 
 

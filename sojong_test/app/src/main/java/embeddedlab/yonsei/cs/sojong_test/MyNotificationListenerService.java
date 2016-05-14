@@ -57,7 +57,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
     public void onNotificationPosted(StatusBarNotification sbn) {
 
         Log.d(TAG, "onNotificationPosted called");
-        //handler.post(new ToastRunnable("Notification Posted : " + sbn.getPackageName()));
+        handler.post(new ToastRunnable("Notification Posted : " + sbn.getPackageName()));
 
         TinyDB tinyDB = new TinyDB(this.getApplicationContext());
         tinyDB.putLong(sbn.getPackageName(), tinyDB.getLong("counter", 0));
@@ -117,7 +117,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
                             if (process.foreground == true)
                             {
                                 //user clicked on notification
-                                //handler.post(new ToastRunnable("Notification Clicked : " + sbn.getPackageName()));
+                                handler.post(new ToastRunnable("Notification Clicked : " + sbn.getPackageName()));
                                 if(count <= 3){
                                     newRankPoint = (rankpoint * 9 + 3.0) / 10;
                                 } else if(count <= 5){
@@ -134,7 +134,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
                             else
                             {
                                 //user swipe notification
-                                //handler.post(new ToastRunnable("Notification Removed : " + sbn.getPackageName()));
+                                handler.post(new ToastRunnable("Notification Removed : " + sbn.getPackageName()));
                                 if(count <= 3){
                                     newRankPoint = (rankpoint * 9 - 3.0) / 10;
                                 } else if(count <= 5){
