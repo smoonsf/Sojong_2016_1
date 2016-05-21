@@ -14,25 +14,15 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
+        android:layout_alignParentTop="true"
         android:layout_toEndOf="@id/imageview_icon"
-        android:id="@+id/textview_appname"/>
+        android:id="@+id/textview_title"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/imageview_reset"
-        android:layout_centerVertical="true"
-        android:maxLength="4"
-        android:id="@+id/textview_rank"/>
-
-    <ImageView
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@android:drawable/ic_menu_rotate"
-        android:id="@+id/imageview_reset"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"/>
+        android:layout_below="@+id/textview_title"
+        android:layout_toEndOf="@id/imageview_icon"
+        android:id="@+id/textview_subtitle"/>
 
 </RelativeLayout>

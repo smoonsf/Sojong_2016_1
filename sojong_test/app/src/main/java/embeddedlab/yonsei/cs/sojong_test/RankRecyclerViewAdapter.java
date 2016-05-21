@@ -1,5 +1,6 @@
 package embeddedlab.yonsei.cs.sojong_test;
 
+import android.content.ContentValues;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -26,11 +27,13 @@ public class RankRecyclerViewAdapter extends RecyclerView.Adapter<RankRecyclerVi
         public ImageView imageView_icon;
         public TextView textView_appName;
         public TextView textView_rank;
+        public ImageView imageView_reset;
         public ViewHolder(View itemView) {
             super(itemView);
             this.imageView_icon = (ImageView) itemView.findViewById(R.id.imageview_icon);
             this.textView_rank = (TextView) itemView.findViewById(R.id.textview_rank);
             this.textView_appName = (TextView) itemView.findViewById(R.id.textview_appname);
+            this.imageView_reset = (ImageView) itemView.findViewById(R.id.imageview_reset);
         }
     }
 
@@ -50,10 +53,23 @@ public class RankRecyclerViewAdapter extends RecyclerView.Adapter<RankRecyclerVi
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.textView_appName.setText(appNames.get(position));
         holder.textView_rank.setText(ranks.get(position) + "");
         holder.imageView_icon.setImageDrawable(icons.get(position));
+        holder.imageView_reset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MySQLiteOpenHelper openHelper = new MySQLiteOpenHelper(v.getContext(), 1);
+                SQLiteDatabase database = openHelper.getWritableDatabase();
+                ContentValues values = new ContentValues();
+                values.put("pname", appNames.get(position));
+                values.put("rankpoint", (Double) 2.0);
+                String[] args = {appNames.get(position)};
+                database.update("apprank", values, "pname=?", args);
+                holder.textView_rank.setText("2.0");
+            }
+        });
 
 
 

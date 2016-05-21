@@ -1,9 +1,11 @@
 package embeddedlab.yonsei.cs.sojong_test;
 
 import android.app.ActivityManager;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -16,9 +18,11 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.jaredrummler.android.processes.ProcessManager;
 import com.jaredrummler.android.processes.models.AndroidAppProcess;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MyNotificationListenerService extends NotificationListenerService {
@@ -29,12 +33,18 @@ public class MyNotificationListenerService extends NotificationListenerService {
     SQLiteDatabase database;
     MySQLiteOpenHelper sqLiteOpenHelper;
 
+    Context ctx;
+
+    static public ArrayList<Notification> notifications;
+
     @Override
     public void onCreate() {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("RUNNING", true).apply();
+
+        notifications = new ArrayList<>();
 
         handler = new Handler();
 
@@ -65,12 +75,20 @@ public class MyNotificationListenerService extends NotificationListenerService {
         sqLiteOpenHelper = new MySQLiteOpenHelper(this, 1);
         database = sqLiteOpenHelper.getWritableDatabase();
 
+
         String[] args = {sbn.getPackageName()};
         Cursor cursor = database.query("apprank", null, "pname = ?", args, null, null, null);
         if(cursor.getCount()==0) {
             ContentValues contentValues = new ContentValues();
             contentValues.put("pname", sbn.getPackageName());
             database.insert("apprank", null, contentValues);
+        } else {
+            cursor.moveToFirst();
+            double rankpoint = cursor.getDouble(cursor.getColumnIndex("rankpoint"));
+
+            if(rankpoint < 1.5 && rankpoint > -1.5){
+                notifications.add(sbn.getNotification());
+            }
         }
 
     }

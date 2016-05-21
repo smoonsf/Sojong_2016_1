@@ -1,20 +1,23 @@
 package embeddedlab.yonsei.cs.sojong_test;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
-import android.preference.PreferenceManager;
+import android.service.notification.StatusBarNotification;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Button;
+
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         icons = new ArrayList<Drawable>();
 
         sqLiteOpenHelper = new MySQLiteOpenHelper(this, 1);
-        database = sqLiteOpenHelper.getWritableDatabase();
+        database = sqLiteOpenHelper.getReadableDatabase();
 
         PackageManager packageManager = getPackageManager();
 
@@ -89,7 +92,37 @@ public class MainActivity extends AppCompatActivity {
         rankRecyclerViewAdapter = new RankRecyclerViewAdapter(appNames, ranks, icons);
         recyclerView.setAdapter(rankRecyclerViewAdapter);
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id == R.id.action_noti){
+//            Intent intent = new Intent(this, HiddenNotificationsActivity.class);
+//            startActivity(intent);
+
+            TinyDB tinyDB = new TinyDB(this.getApplicationContext());
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            MyNotificationListenerService myNotificationListenerService = new MyNotificationListenerService();
 
 
+
+            int i = 0;
+            if(myNotificationListenerService.notifications != null) {
+                for (Notification noti : myNotificationListenerService.notifications) {
+                    notificationManager.notify(i++, noti);
+                    myNotificationListenerService.notifications.clear();
+                }
+            }
+            //tinyDB.putListObject("hidden_notis", new ArrayList<Object>());
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
