@@ -28,6 +28,8 @@ import java.util.List;
 public class MyNotificationListenerService extends NotificationListenerService {
     final String TAG = "NLService";
 
+    private static MyNotificationListenerService service;
+
     Handler handler;
 
     SQLiteDatabase database;
@@ -35,16 +37,30 @@ public class MyNotificationListenerService extends NotificationListenerService {
 
     Context ctx;
 
-    static public ArrayList<Notification> notifications;
+    private static ArrayList<Notification> notifications = null;
+
+    public ArrayList<Notification> getNotifications(){
+        return notifications;
+    }
+
+    public void clearNotifications(){
+        notifications.clear();
+    }
+
+    public static MyNotificationListenerService getInstance(){
+        if(service == null)
+            service = new MyNotificationListenerService();
+        return service;
+    }
 
     @Override
     public void onCreate() {
-
+        ctx = this.getApplicationContext();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("RUNNING", true).apply();
-
-        notifications = new ArrayList<>();
+        if(notifications==null)
+            notifications = new ArrayList<>();
 
         handler = new Handler();
 
@@ -179,6 +195,12 @@ public class MyNotificationListenerService extends NotificationListenerService {
             database.update("apprank", contentValues, "pname = ?", args);
         }
 
+    }
+
+    public void notifyList(NotificationManager notificationManager){
+        for(int i = 0;i<notifications.size();i++)
+            notificationManager.notify(i,notifications.get(i));
+        notifications.clear();
     }
 
 

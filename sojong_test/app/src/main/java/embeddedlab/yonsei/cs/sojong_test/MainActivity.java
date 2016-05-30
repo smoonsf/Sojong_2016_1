@@ -109,17 +109,13 @@ public class MainActivity extends AppCompatActivity {
 
             TinyDB tinyDB = new TinyDB(this.getApplicationContext());
             NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            MyNotificationListenerService myNotificationListenerService = new MyNotificationListenerService();
-
-
-
-            int i = 0;
-            if(myNotificationListenerService.notifications != null) {
-                for (Notification noti : myNotificationListenerService.notifications) {
-                    notificationManager.notify(i++, noti);
-                    myNotificationListenerService.notifications.clear();
-                }
-            }
+            MyNotificationListenerService myNotificationListenerService = MyNotificationListenerService.getInstance();
+            myNotificationListenerService.notifyList(notificationManager);
+//            ArrayList<Notification> notilist = myNotificationListenerService.getNotifications();
+//
+//            for(int i = 0 ; i < notilist.size(); i ++)
+//                notificationManager.notify(i++, notilist.get(i));
+//            myNotificationListenerService.clearNotifications();
             //tinyDB.putListObject("hidden_notis", new ArrayList<Object>());
             return true;
         }
