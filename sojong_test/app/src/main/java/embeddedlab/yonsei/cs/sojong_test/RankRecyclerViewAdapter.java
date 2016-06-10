@@ -9,7 +9,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.List;
@@ -22,14 +24,17 @@ public class RankRecyclerViewAdapter extends RecyclerView.Adapter<RankRecyclerVi
     List<String> appNames;
     List<Double> ranks;
     List<Drawable> icons;
+    List<Integer> modes;
 
     class ViewHolder extends RecyclerView.ViewHolder {
         public ImageView imageView_icon;
         public TextView textView_appName;
         public TextView textView_rank;
         public ImageView imageView_reset;
+        public Switch switch_mode;
         public ViewHolder(View itemView) {
             super(itemView);
+            this.switch_mode = (Switch) itemView.findViewById(R.id.switch_mode);
             this.imageView_icon = (ImageView) itemView.findViewById(R.id.imageview_icon);
             this.textView_rank = (TextView) itemView.findViewById(R.id.textview_rank);
             this.textView_appName = (TextView) itemView.findViewById(R.id.textview_appname);
@@ -37,10 +42,11 @@ public class RankRecyclerViewAdapter extends RecyclerView.Adapter<RankRecyclerVi
         }
     }
 
-    RankRecyclerViewAdapter(List<String> _appNames, List<Double> _ranks, List<Drawable> _icons){
+    RankRecyclerViewAdapter(List<String> _appNames, List<Double> _ranks, List<Drawable> _icons, List<Integer> _modes){
         appNames = _appNames;
         ranks = _ranks;
         icons = _icons;
+        modes = _modes;
 
     }
 
@@ -70,6 +76,24 @@ public class RankRecyclerViewAdapter extends RecyclerView.Adapter<RankRecyclerVi
                 holder.textView_rank.setText("2.0");
             }
         });
+        holder.switch_mode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                MySQLiteOpenHelper openHelper = new MySQLiteOpenHelper(buttonView.getContext(), 1);
+                SQLiteDatabase database = openHelper.getWritableDatabase();
+                ContentValues values = new ContentValues();
+                Integer modebit = 0;
+                if(isChecked)
+                    modebit = 1;
+                values.put("mode", modebit);
+                String[] args = {appNames.get(position)};
+                database.update("apprank", values, "pname=?", args);
+            }
+        });
+        if(modes.get(position) == 0)
+            holder.switch_mode.setChecked(false);
+        else
+            holder.switch_mode.setChecked(true);
 
 
 

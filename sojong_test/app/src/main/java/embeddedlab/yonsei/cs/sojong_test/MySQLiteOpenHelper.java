@@ -24,7 +24,8 @@ public class MySQLiteOpenHelper extends SQLiteOpenHelper{
 
         sql = "create table apprank ("
                 + "pname text primary key, "
-                + "rankpoint double default 2.0);";
+                + "rankpoint double default 2.0, "
+                + "mode integer default 0);";
         db.execSQL(sql);
     }
 

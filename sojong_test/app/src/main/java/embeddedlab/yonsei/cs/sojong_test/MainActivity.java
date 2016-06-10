@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     List<String> appNames;
     List<Double> ranks;
     List<Drawable> icons;
+    List<Integer> modes;
 
     RecyclerView recyclerView;
     LinearLayoutManager linearLayoutManager;
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         appNames = new ArrayList<String>();
         ranks = new ArrayList<Double>();
         icons = new ArrayList<Drawable>();
+        modes = new ArrayList<>();
 
         sqLiteOpenHelper = new MySQLiteOpenHelper(this, 1);
         database = sqLiteOpenHelper.getReadableDatabase();
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         while (cursor.moveToNext()){
             Double rankPoint = cursor.getDouble(cursor.getColumnIndex("rankpoint"));
             String packageName = cursor.getString(cursor.getColumnIndex("pname"));
+            Integer mode = cursor.getInt(cursor.getColumnIndex("mode"));
             ApplicationInfo applicationInfo;
             Drawable applicationIcon;
             try {
@@ -71,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
             appNames.add(packageName);
             ranks.add(rankPoint);
             icons.add(applicationIcon);
+            modes.add(mode);
 
 
 //            String appName = (String) (applicationInfo != null ? packageManager.getApplicationLabel(applicationInfo) : "(unknown)");
@@ -89,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView_rank);
         linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
-        rankRecyclerViewAdapter = new RankRecyclerViewAdapter(appNames, ranks, icons);
+        rankRecyclerViewAdapter = new RankRecyclerViewAdapter(appNames, ranks, icons, modes);
         recyclerView.setAdapter(rankRecyclerViewAdapter);
 
     }
@@ -108,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
 //            startActivity(intent);
 
             TinyDB tinyDB = new TinyDB(this.getApplicationContext());
-            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            NotificationManager notificationManager = (NotificationManager) this.getApplicationContext().getSystemService(NOTIFICATION_SERVICE);
             MyNotificationListenerService myNotificationListenerService = MyNotificationListenerService.getInstance();
             myNotificationListenerService.notifyList(notificationManager);
 //            ArrayList<Notification> notilist = myNotificationListenerService.getNotifications();
